@@ -3,6 +3,7 @@ package com.scilab.giftslist.domain.user.model;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,6 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.scilab.giftslist.domain.lists.model.GiftList;
+import com.scilab.giftslist.domain.photo.model.Photo;
 
 import lombok.Builder;
 import lombok.Data;
@@ -27,7 +29,7 @@ public class User implements UserDetails {
     @Indexed(unique = true)
     private String email;
     private String firstname;
-    private String lastname;
+    private String lastname;    
     private UserProfile profile;
     private AccountStatus status;
     private String renewPasswordCode;
@@ -35,6 +37,15 @@ public class User implements UserDetails {
     private List<GiftList> giftLists;
     @DocumentReference(lazy = true)
     private List<User> friends;
+    @DocumentReference(lazy = true)
+    private List<User> friendsRequest;
+    @DocumentReference(lazy = true)
+    private Photo profilePicture;
+
+
+    public String usageName(){
+        return StringUtils.isAnyBlank(firstname, lastname) ? username : String.format("%s %s", firstname, lastname);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

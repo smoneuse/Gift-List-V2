@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.scilab.giftslist.api.ApiConstants;
 import com.scilab.giftslist.api.ApiOperationStatus;
-import com.scilab.giftslist.api.GiftListController;
+import com.scilab.giftslist.api.GiftListRootController;
 import com.scilab.giftslist.api.login.requests.AuthenticationRequest;
 import com.scilab.giftslist.api.login.requests.UserRegisterRequest;
 import com.scilab.giftslist.api.login.responses.AskForPasswordResetResponse;
@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping(ApiConstants.API_V1_PREFIX+"/login")
 @Slf4j
 @RequiredArgsConstructor
-public class LoginResource extends GiftListController{
+public class LoginController extends GiftListRootController{
 
     
     private final UserService userService;

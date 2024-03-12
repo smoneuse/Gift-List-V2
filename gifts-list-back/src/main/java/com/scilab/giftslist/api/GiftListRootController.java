@@ -8,7 +8,7 @@ import com.scilab.giftslist.infra.errors.BadRequestException;
 import com.scilab.giftslist.infra.errors.DefaultException;
 import com.scilab.giftslist.infra.errors.NotFoundException;
 
-public class GiftListController {
+public class GiftListRootController {
     @ExceptionHandler(DefaultException.class)
     public ResponseEntity<String> handleDefaultEx(DefaultException def){
         return ResponseEntity.internalServerError().body(def.getMessage());

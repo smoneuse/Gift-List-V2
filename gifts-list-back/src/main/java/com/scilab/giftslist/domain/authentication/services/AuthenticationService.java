@@ -1,15 +1,11 @@
 package com.scilab.giftslist.domain.authentication.services;
 
-import java.util.Optional;
-import java.util.Random;
-
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.scilab.giftslist.domain.authentication.models.AuthCredentials;
 import com.scilab.giftslist.domain.authentication.models.AuthToken;
-import com.scilab.giftslist.domain.user.repo.UserRepository;
 import com.scilab.giftslist.domain.user.services.UserService;
 import com.scilab.giftslist.infra.jwt.JwtService;
 
