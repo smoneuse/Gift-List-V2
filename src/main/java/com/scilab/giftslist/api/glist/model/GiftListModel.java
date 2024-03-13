@@ -1,5 +1,7 @@
 package com.scilab.giftslist.api.glist.model;
 
+import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,4 +13,5 @@ public class GiftListModel {
     private String pictureId;
     private long availableGifts;
     private long reservedGifts;
+    private LocalDateTime lastUpdate;
 }

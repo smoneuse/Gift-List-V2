@@ -1,5 +1,6 @@
 package com.scilab.giftslist.domain.lists.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,11 +30,25 @@ public class GiftListService {
     private UserRepository userRepository;
     
     public Page<GiftList> userLists(String username, PageInputs paging, String sortField){
-        ensureUsernameNotBlank(username);
+        ensureUsernameNotBlank(username);        
         User owner= userRepository.findUserByUsernameIgnoreCase(username).orElseThrow(()-> new NotFoundException("Cannot create list : user not found : "+username));
 
-        Pageable pageSeting = PageRequest.of(paging.page(), paging.pageSize(), Sort.by(sortField));
-        return giftListRepository.findGiftListsByOwner(owner, pageSeting);
+        Pageable pageSetting = PageRequest.of(paging.page(), paging.pageSize(), Sort.by(sortField));
+        return giftListRepository.findGiftListsByOwner(owner, pageSetting);
+    }
+
+    public Page<GiftList> friendLists(String requestingUsername, String friendId, PageInputs paging, String sortField){
+        ensureUsernameNotBlank(requestingUsername);
+        if(StringUtils.isBlank(friendId)){throw new BadRequestException("Can't request a friend's list without it ID");}
+        User requestingUser = userRepository.findUserByUsernameIgnoreCase(requestingUsername).orElseThrow(()->new NotFoundException("Requesting user not found : "+requestingUsername));
+        if(!isFriend(requestingUser, friendId)){throw new BadRequestException("Specified user is not a friend.");}
+        User friendUser =userRepository.findById(friendId).orElseThrow(()->new NotFoundException("Friend user ID not found : "+friendId));
+        Pageable pageSetting = PageRequest.of(paging.page(), paging.pageSize(), Sort.by(sortField));
+        return giftListRepository.findGiftListsByOwner(friendUser, pageSetting);
+    }
+
+    private boolean isFriend(User aUser, String friendId){
+        return aUser.getFriends().stream().anyMatch(aFriend-> aFriend.getId().equals(friendId));
     }
 
     public GiftList createList(String username, GiftListModel model){
@@ -45,12 +60,26 @@ public class GiftListService {
         GiftList newList = GiftList.builder()
             .name(model.getTitle())
             .description(model.getDescription())
+            .lastUpdate(LocalDateTime.now())
             .owner(owner)
             .build();
         GiftList createdList =giftListRepository.insert(newList);
         owner.getGiftLists().add(createdList);
         userRepository.save(owner);
         return createdList;
+    }
+
+    public GiftList updateList(String userName, GiftListModel model){
+        ensureUsernameNotBlank(userName);
+        User owner= userRepository.findUserByUsernameIgnoreCase(userName).orElseThrow(()-> new NotFoundException("Cannot update list : user not found : "+userName));
+        if( giftListRepository.findGiftListByNameIsAndOwnerIsAndIdIsNot(model.getTitle(), owner, model.getId()).isPresent()){
+            throw new BadRequestException("Can't proceed : Another list exists with the same title");
+        }
+        GiftList toUpdate = giftListRepository.findGiftListByIdAndOwnerIs(model.getId(), owner).orElseThrow(()-> new BadRequestException("Can't proceed : You're not the owner of this list"));
+        toUpdate.setDescription(model.getDescription());
+        toUpdate.setName(model.getTitle());
+        toUpdate.setLastUpdate(LocalDateTime.now());
+        return giftListRepository.save(toUpdate);
     }
 
     public ApiResponse deleteGiftList(String username, String giftListId){
