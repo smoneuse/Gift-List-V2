@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
+import com.scilab.giftslist.domain.discussion.Discussion;
 import com.scilab.giftslist.domain.lists.model.GiftList;
 import com.scilab.giftslist.domain.tag.model.Tag;
 import com.scilab.giftslist.domain.user.model.User;
@@ -32,6 +33,8 @@ public class Gift {
     private User giver;
     @DocumentReference(lazy = true)
     private List<Tag> tags;
+    @DocumentReference(lazy = true)
+    private Discussion discussion;
     private LocalDateTime giveDate;
     private GiftStatus status;
 }
