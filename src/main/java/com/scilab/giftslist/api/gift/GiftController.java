@@ -82,5 +82,7 @@ public class GiftController extends GiftListRootController{
         if(model == null || StringUtils.isAnyBlank(model.getId(),listId)){
             throw new BadRequestException("Can't update a gift without ID or list identifier");
         }
+        GiftModel response = GiftModel.fromGift(giftService.updateGift(AuthenticationFacade.userName(), listId, model));
+        return ResponseEntity.ok(response);
     }
 }

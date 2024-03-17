@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.scilab.giftslist.domain.gift.Gift;
+import com.scilab.giftslist.domain.tag.model.Tag;
 
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ public class GiftModel {
     private String comment;
     private int rating;
     private LocalDateTime lastUpdate;
-    private List<String> tags;
+    private List<Tag> tags;
     private List<String> externalList;
     private String status;    
     private String discussionId;
@@ -30,7 +31,7 @@ public class GiftModel {
             .comment(from.getComment())
             .rating(from.getRating())
             .lastUpdate(from.getLastUpdate())
-            .tags(from.getTags().stream().map(aTag->aTag.getTitle()).toList())
+            .tags(from.getTags())
             .externalList(from.getExternalLinks())
             .status(from.getStatus().name())
             .giveDate(from.getGiveDate())

@@ -71,6 +71,7 @@ public class GiftService {
         if(giftRepository.findGiftByOwningListAndTitleIs(giftList, model.getTitle()).isPresent()){
             throw new BadRequestException("Can't add gift : Another gift with same title already exists in this list");
         }
+
         Gift giftToAdd =  Gift.builder()
             .title(model.getTitle())
             .comment(model.getComment())
@@ -79,9 +80,7 @@ public class GiftService {
             .lastUpdate(LocalDateTime.now())
             .externalLinks(model.getExternalList())
             .status(GiftStatus.AVAILABLE)
-            .tags(model.getTags().stream().map(aTag->{
-                return tagRepository.findTagByTitle(aTag).orElseThrow(()-> new NotFoundException("Tag not found : "+aTag));
-            }).toList())
+            .tags(model.getTags())
             .build();
         //Add gift to the repository
         return giftRepository.insert(giftToAdd);        
@@ -96,6 +95,29 @@ public class GiftService {
             throw new BadRequestException("The git with ID "+model.getId()+" doesn't belong to the list with ID :"+listId);
         }        
         giftRepository.delete(toRemove);
+    }
+
+    public Gift updateGift(String username, String listId, GiftModel model){
+        User owner = checkAndProvideUser(username);
+        GiftList giftList = checkAndProvideListByOwnerAndId(owner, listId);
+        Gift toUpdate = giftRepository.findById(model.getId()).orElseThrow(()-> new NotFoundException("No gift with ID "+model.getId()));
+        giftRepository.findGiftByOwningListAndTitleIs(giftList, model.getTitle()).ifPresent(aGift->{
+            if(!aGift.getId().equals(model.getId())){
+                throw new BadRequestException("Can't update gift : Another gift with same title exists");
+            }
+        });
+        toUpdate.setTitle(model.getTitle());
+        toUpdate.setComment(model.getComment());
+        toUpdate.setRating(model.getRating());
+        toUpdate.setExternalLinks(model.getExternalList());
+        toUpdate.setTags(model.getTags());
+        toUpdate.setLastUpdate(LocalDateTime.now());
+        Gift updatedGift =giftRepository.save(toUpdate);
+        //Updating the list last update date
+        giftList.setLastUpdate(LocalDateTime.now());
+        giftListRepository.save(giftList);
+        
+        return updatedGift;
     }
 
     private User checkAndProvideUser(String username){
