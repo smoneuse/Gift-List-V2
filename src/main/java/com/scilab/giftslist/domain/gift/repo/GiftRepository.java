@@ -17,6 +17,7 @@ public interface GiftRepository extends MongoRepository<Gift, String>{
     Page<Gift> findGiftsByOwningListAndStatusIn(GiftList giftList, List<GiftStatus> status, Pageable paging);
     Page<Gift> findGiftsByOwningListAndGiverIsOrStatusIs(GiftList giftList, User giver, GiftStatus status, Pageable paging);
     Optional<Gift> findGiftByOwningListAndTitleIs(GiftList owningList, String title);
+    Optional<Gift> findGiftByOwningListAndIdIs(GiftList owningList, String id);
     long countGiftsByOwningListAndGiverIsAndStatusIn(GiftList giftList, User giver,GiftStatus... status);
 
 }

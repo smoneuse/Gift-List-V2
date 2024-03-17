@@ -85,4 +85,22 @@ public class GiftController extends GiftListRootController{
         GiftModel response = GiftModel.fromGift(giftService.updateGift(AuthenticationFacade.userName(), listId, model));
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/reserve/{listId}")
+    public ResponseEntity<GiftModel> reserveGift(@RequestBody GiftModel model, @PathVariable("listId") String listId){
+        if(model == null || StringUtils.isAnyBlank(model.getId(),listId)){
+            throw new BadRequestException("Can't reserve a gift without ID or list identifier");
+        }
+        GiftModel response = GiftModel.fromGift(giftService.reserve(AuthenticationFacade.userName(), listId, model));
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/cancel/{listId}")
+    public ResponseEntity<GiftModel> cancelGiftReservation(@RequestBody GiftModel model, @PathVariable("listId") String listId){
+        if(model == null || StringUtils.isAnyBlank(model.getId(),listId)){
+            throw new BadRequestException("Can't cancel a gift reservation without ID or list identifier");
+        }
+        GiftModel response = GiftModel.fromGift(giftService.cancelReservation(AuthenticationFacade.userName(), listId, model));
+        return ResponseEntity.ok(response);
+    }
 }

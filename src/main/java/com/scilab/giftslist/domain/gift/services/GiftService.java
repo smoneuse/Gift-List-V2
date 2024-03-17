@@ -16,7 +16,6 @@ import com.scilab.giftslist.api.gift.models.GiftModel;
 import com.scilab.giftslist.domain.gift.Gift;
 import com.scilab.giftslist.domain.gift.GiftStatus;
 import com.scilab.giftslist.domain.gift.repo.GiftRepository;
-import com.scilab.giftslist.domain.tag.repo.TagRepository;
 import com.scilab.giftslist.domain.lists.model.GiftList;
 import com.scilab.giftslist.domain.lists.repo.GiftListRepository;
 import com.scilab.giftslist.domain.user.model.User;
@@ -35,9 +34,6 @@ public class GiftService {
 
     @Autowired
     private GiftListRepository giftListRepository;
-
-    @Autowired
-    private TagRepository tagRepository;
 
     public long countGiftsInList(GiftList giftList, GiftStatus... status){
         return giftRepository.countGiftsByOwningListAndStatusIn(giftList, status);
@@ -118,6 +114,37 @@ public class GiftService {
         giftListRepository.save(giftList);
         
         return updatedGift;
+    }
+
+
+    public Gift reserve(String giverUsername, String listId, GiftModel model){
+        User giver = checkAndProvideUser(giverUsername);
+        GiftList ownerList = checkAndProvideListById(listId);
+        if(!giver.getFriends().stream().anyMatch(aFriend-> aFriend.getId().equals(ownerList.getOwner().getId()))){
+            throw new BadRequestException("The list owner is not registered as Friend");
+        }
+        Gift reservedGift = giftRepository.findGiftByOwningListAndIdIs(ownerList, model.getId()).orElseThrow(()->new NotFoundException(String.format("Cant find Gift [%s] In list [%s]", model.getId(), listId)));
+        reservedGift.setStatus(GiftStatus.RESERVED);
+        reservedGift.setGiveDate(model.getGiveDate());
+        reservedGift.setGiver(giver);
+        return giftRepository.save(reservedGift);
+    }
+
+
+    public Gift cancelReservation(String giverUsername, String listId, GiftModel model){
+        User giver = checkAndProvideUser(giverUsername);
+        GiftList ownerList = checkAndProvideListById(listId);
+        if(!giver.getFriends().stream().anyMatch(aFriend-> aFriend.getId().equals(ownerList.getOwner().getId()))){
+            throw new BadRequestException("The list owner is not registered as Friend");
+        }
+        Gift reservedGift = giftRepository.findGiftByOwningListAndIdIs(ownerList, model.getId()).orElseThrow(()->new NotFoundException(String.format("Cant find Gift [%s] In list [%s]", model.getId(), listId)));
+        if(reservedGift.getStatus()!=GiftStatus.RESERVED || !reservedGift.getGiver().getId().equals(giver.getId())){
+            throw new BadRequestException(String.format("This Gift is not reserved by user [%s]",giverUsername));
+        }
+        reservedGift.setStatus(GiftStatus.AVAILABLE);
+        reservedGift.setGiveDate(null);
+        reservedGift.setGiver(null);
+        return giftRepository.save(reservedGift);
     }
 
     private User checkAndProvideUser(String username){
