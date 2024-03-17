@@ -22,7 +22,7 @@ public class GiftList {
     private String name;
     private String description;
     private LocalDateTime lastUpdate;
-    @DocumentReference(lazy = true)
+    @DocumentReference(lazy = true)    
     private User owner;
     @DocumentReference(lazy = true)
     private Photo picture;

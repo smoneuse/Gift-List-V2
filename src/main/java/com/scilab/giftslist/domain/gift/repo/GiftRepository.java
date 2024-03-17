@@ -19,5 +19,5 @@ public interface GiftRepository extends MongoRepository<Gift, String>{
     Optional<Gift> findGiftByOwningListAndTitleIs(GiftList owningList, String title);
     Optional<Gift> findGiftByOwningListAndIdIs(GiftList owningList, String id);
     long countGiftsByOwningListAndGiverIsAndStatusIn(GiftList giftList, User giver,GiftStatus... status);
-
+    void deleteByOwningList(GiftList giftList);
 }

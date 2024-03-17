@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.scilab.giftslist.api.PageInputs;
 import com.scilab.giftslist.api.glist.model.GiftListModel;
 import com.scilab.giftslist.api.shared.ApiResponse;
+import com.scilab.giftslist.domain.gift.repo.GiftRepository;
 import com.scilab.giftslist.domain.lists.model.GiftList;
 import com.scilab.giftslist.domain.lists.repo.GiftListRepository;
 import com.scilab.giftslist.domain.user.model.User;
@@ -26,6 +27,8 @@ public class GiftListService {
     
     @Autowired
     private GiftListRepository giftListRepository;
+    @Autowired
+    private GiftRepository giftRepository;
     @Autowired
     private UserRepository userRepository;
     
@@ -95,6 +98,8 @@ public class GiftListService {
             listOwner.getGiftLists().removeIf(aList-> aList.getId().equals(listToDelete.getId()));
             userRepository.save(listOwner);
             giftListRepository.delete(listToDelete);
+            //Now delete associated Gifts
+            giftRepository.deleteByOwningList(listToDelete);
             return new ApiResponse(true, StringUtils.EMPTY);
         }
         return new ApiResponse(false,"Can't delete a list the user don't own");

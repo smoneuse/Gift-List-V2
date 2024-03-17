@@ -20,7 +20,6 @@ import com.scilab.giftslist.api.GiftListRootController;
 import com.scilab.giftslist.api.PageInputs;
 import com.scilab.giftslist.api.gift.models.GiftModel;
 import com.scilab.giftslist.api.gift.models.GiftPage;
-import com.scilab.giftslist.api.shared.ApiResponse;
 import com.scilab.giftslist.domain.gift.Gift;
 import com.scilab.giftslist.domain.gift.GiftStatus;
 import com.scilab.giftslist.domain.gift.services.GiftService;

@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.scilab.giftslist.api.ApiConstants;
 import com.scilab.giftslist.api.GiftListRootController;
 import com.scilab.giftslist.api.PageInputs;
-import com.scilab.giftslist.api.user.response.SearchUsersResponse;
-import com.scilab.giftslist.api.user.response.UserSearchResult;
-import com.scilab.giftslist.api.user.shared.UserProfileData;
+import com.scilab.giftslist.api.user.model.SearchUsersModel;
+import com.scilab.giftslist.api.user.model.UserModel;
 import com.scilab.giftslist.domain.user.model.User;
 import com.scilab.giftslist.domain.user.services.UserService;
 import com.scilab.giftslist.infra.errors.NotFoundException;
@@ -31,14 +30,15 @@ public class UserController extends GiftListRootController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<SearchUsersResponse> search(@RequestParam(name="filter", defaultValue = "") String filter, @RequestParam(name="page", defaultValue = "0") int page, @RequestParam(name="pageSize", defaultValue = "20" )int pageSize){
+    public ResponseEntity<SearchUsersModel> search(@RequestParam(name="filter", defaultValue = "") String filter, @RequestParam(name="page", defaultValue = "0") int page, @RequestParam(name="pageSize", defaultValue = "20" )int pageSize){
         PageInputs paging = new PageInputs(page, pageSize);
         Page<User> searchResult =userService.searchByUserName(filter, paging.page(), paging.pageSize());
-        SearchUsersResponse response = SearchUsersResponse.builder()
+        SearchUsersModel response = SearchUsersModel.builder()
             .total(searchResult.getTotalElements())
             .users(searchResult.getContent().stream().map(aUser->{
-                return UserSearchResult.builder()
+                return UserModel.builder()
                     .username(aUser.getUsername())
+                    .usagename(aUser.usageName())
                     .listCount(aUser.getGiftLists().size())
                     .pictureId(aUser.getProfilePicture().getId())
                     .build();
@@ -48,29 +48,17 @@ public class UserController extends GiftListRootController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileData> profile(){
+    public ResponseEntity<UserModel> profile(){
         User currentUser =userService.findByUsername(AuthenticationFacade.userName()).orElseThrow(()->new NotFoundException("User not fount : "+AuthenticationFacade.userName()));
-        UserProfileData response = UserProfileData.builder()
-                    .firstName(currentUser.getFirstname())
-                    .lastName(currentUser.getLastname())
-                    .username(currentUser.getUsername())
-                    .email(currentUser.getEmail())
-                    .pictureId(currentUser.getProfilePicture().getId())
-                    .build();
+        UserModel response = UserModel.fromUser(currentUser);
         return ResponseEntity.ok(response);                    
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<UserProfileData> updateProfile(@RequestBody UserProfileData updatedProfile){
+    public ResponseEntity<UserModel> updateProfile(@RequestBody UserModel updatedProfile){
         updatedProfile.checkInput();
         User updatedUser=userService.updateUser(AuthenticationFacade.userName(), updatedProfile);
-        UserProfileData response = UserProfileData.builder()
-                    .firstName(updatedUser.getFirstname())
-                    .lastName(updatedUser.getLastname())
-                    .username(updatedUser.getUsername())
-                    .email(updatedUser.getEmail())
-                    .pictureId(updatedUser.getProfilePicture().getId())
-                    .build();
+        UserModel response = UserModel.fromUser(updatedUser);
         return ResponseEntity.ok(response);     
     }
 }

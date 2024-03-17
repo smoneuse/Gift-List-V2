@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.scilab.giftslist.api.user.shared.UserProfileData;
+import com.scilab.giftslist.api.user.model.UserModel;
 import com.scilab.giftslist.domain.photo.model.Photo;
 import com.scilab.giftslist.domain.user.model.User;
 import com.scilab.giftslist.domain.user.repo.UserRepository;
@@ -65,7 +65,7 @@ public class UserService {
         return userRepository.findUsersByUsernameContaining(filter, pageRequest);
     }
 
-    public User updateUser(String username, UserProfileData updatedProfileData){
+    public User updateUser(String username, UserModel updatedProfileData){
         User currentUser =userRepository.findUserByUsernameIgnoreCase(username).orElseThrow(()->new NotFoundException("User not found : "+AuthenticationFacade.userName()));
         if(!username.equals(updatedProfileData.getUsername())){
             userRepository.findUserByUsernameIgnoreCase(updatedProfileData.getUsername()).ifPresent(existingUser->{
@@ -76,11 +76,11 @@ public class UserService {
             userRepository.findUserByEmailIgnoreCase(updatedProfileData.getEmail()).ifPresent(existingUser->{
                 throw new BadRequestException("A user already exists with this email : "+existingUser.getEmail());
             }); 
-        }        
+        }    
         currentUser.setUsername(updatedProfileData.getUsername().toLowerCase());
         currentUser.setEmail(updatedProfileData.getEmail().toLowerCase());
-        currentUser.setFirstname(updatedProfileData.getFirstName());
-        currentUser.setLastname(updatedProfileData.getLastName());
+        currentUser.setFirstname(updatedProfileData.getFirstname());
+        currentUser.setLastname(updatedProfileData.getLastname());
         return userRepository.save(currentUser);
     }
 }
