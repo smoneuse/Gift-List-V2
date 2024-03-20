@@ -40,7 +40,7 @@ public class DiscussionService {
     @Autowired
     private DiscussionNotificationService discussionNotificationService;
 
-    public Discussion addDiscussionComment(String username, String comment, String giftId){
+    public DiscussionComment addDiscussionComment(String username, String comment, String giftId){
         User author = userRepository.findUserByUsernameIgnoreCase(username).orElseThrow(()-> new NotFoundException("No user with username :"+username));
         Gift gift = giftRepository.findById(giftId).orElseThrow(()-> new NotFoundException("No gift with ID "+giftId));
         Discussion discussion = Optional.ofNullable(gift.getDiscussion()).orElse(Discussion.builder().build());
@@ -57,7 +57,7 @@ public class DiscussionService {
             giftRepository.save(gift);
         }
         discussionNotificationService.notifyForDiscussion(currentGiftDiscussion, insertedComment, gift);
-        return currentGiftDiscussion;
+        return insertedComment;
     }
 
     public DiscussionComment updateComment(String username, String updatedComment, String commentId){
